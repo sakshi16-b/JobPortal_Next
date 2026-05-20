@@ -19,7 +19,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-import { Eye, EyeOff, User, UserCheck, Lock } from 'lucide-react';
+import { Eye, EyeOff, User, UserCheck, Lock, Mail } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';   
 import Link from 'next/link';
@@ -63,7 +63,7 @@ const Registration: React.FC = () => {
       role: formData.role,
     };
 if (formData.password !== formData.confirmPassword) {
-  toast.error("Passwords do not match",{ position: "top-center" });
+  toast.error("Passwords do not match",{ position: "top-right" });
   return;
 }
 
@@ -134,7 +134,7 @@ if (formData.password !== formData.confirmPassword) {
             <div className="space-y-2">
               <Label htmlFor="name">Email Address *</Label>
               <div className="relative">
-                <User
+                <Mail
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 
             text-muted-foreground"
                 />
@@ -177,7 +177,7 @@ if (formData.password !== formData.confirmPassword) {
             <div className="space-y-2">
               <Label htmlFor="name">Password *</Label>
               <div className="relative">
-                <User
+                <Lock
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 
             text-muted-foreground"
                 />
