@@ -1,3 +1,4 @@
+
 'use server';
 import { db } from '@/config/db';
 import { users } from '@/drizzle/schema';
@@ -44,7 +45,6 @@ export const registrationAction = async (data: {
   }
 };
 
-
 export const loginAction = async (data: {
   password: string;
   email: string;
@@ -52,18 +52,17 @@ export const loginAction = async (data: {
   try {
     const { email, password } = data;
     const [user] = await db.select().from(users).where(eq(users.email, email));
-    console.log(user)
+    console.log(user);
 
-    if (!user){
+    if (!user) {
       return {
         status: 'ERROR',
         message: 'Invalid mail or password',
       };
-
     }
     const isPasswordCorrect = await argon2.verify(user.password, password);
-  
-    if (!isPasswordCorrect){
+
+    if (!isPasswordCorrect) {
       return {
         status: 'ERROR',
         message: 'Invalid mail or password',
