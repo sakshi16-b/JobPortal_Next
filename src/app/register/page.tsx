@@ -21,11 +21,11 @@ import {
 
 import { Eye, EyeOff, User, UserCheck, Lock, Mail } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';   
+import { toast } from 'sonner';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import React, { ChangeEvent, useState } from 'react';
-import { registrationAction } from './registrationAction.action';
+import { registrationAction } from '@/features/auth/server/auth.actions';
 
 interface RegistrationFormData {
   name: string;
@@ -62,14 +62,19 @@ const Registration: React.FC = () => {
       password: formData.password,
       role: formData.role,
     };
-if (formData.password !== formData.confirmPassword) {
-  toast.error("Passwords do not match",{ position: "top-right" });
-  return;
-}
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match', {
+        position: 'top-right',
+      });
+      return;
+    }
 
-    // logic
-
-    await registrationAction(registrationData);
+    const response = await registrationAction(registrationData);
+    if (response.status === 'SUCCESS') {
+      toast.success(response.message);
+    } else {
+      toast.error(response.message);
+    }
   };
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 ">

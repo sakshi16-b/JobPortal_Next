@@ -4,5 +4,5 @@ export const loginAction = async (data: {
   password: string;
 }) => {
   const { email, password } = data;
-  console.log(email,password)
+  console.log(email,password);
 };

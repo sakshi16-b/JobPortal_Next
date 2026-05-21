@@ -13,15 +13,16 @@ import { Input } from '@/components/ui/input';
 import { ChangeEvent, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { loginAction } from './loginAction.action';
+import { loginAction } from '@/features/auth/server/auth.actions';
+import { toast } from 'sonner';
 
-interface LoginFormData {
+interface LoginData {
   email: string;
   password: string;
 }
 
 const Login: React.FC = () => {
-  const [formData, setFormData] = useState<LoginFormData>({
+  const [formData, setFormData] = useState<LoginData>({
     email: '',
     password: '',
   });
@@ -31,19 +32,23 @@ const Login: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit=async(e:React.SyntheticEvent<HTMLFormElement>)=>{
-  
-    try{
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    const LoginData={
-      email:formData.email.toLowerCase().trim,
-      password:formData.password
-
+    const loginData = {
+      email: formData.email.toLowerCase().trim(),
+      password: formData.password,
     };
-    
-    catch(error){}
-    }
+
+  
+ const response = await loginAction(loginData);  
+ if(response.status==="SUCCESS")  
+  toast.success(response.message)
+else
+  toast.error(response.message)
   }
+
+    
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <Card className="w-full max-w-md">
@@ -143,5 +148,6 @@ const Login: React.FC = () => {
     </div>
   );
 };
+
 
 export default Login;
