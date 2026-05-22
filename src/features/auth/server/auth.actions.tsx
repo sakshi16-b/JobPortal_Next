@@ -79,4 +79,4 @@ export const loginAction = async (data: {
       message: 'Something went wrong',
     };
   }
-};
+}
