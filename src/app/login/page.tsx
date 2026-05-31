@@ -13,42 +13,31 @@ import { Input } from '@/components/ui/input';
 import { ChangeEvent, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { loginAction } from '@/features/auth/server/auth.actions';
+import { loginUserAction } from '@/features/auth/server/auth.actions';
 import { toast } from 'sonner';
-
-interface LoginData {
-  email: string;
-  password: string;
-}
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { LoginUserData, loginUserSchema } from '@/features/auth/auth.schema';
 
 const Login: React.FC = () => {
-  const [formData, setFormData] = useState<LoginData>({
-    email: '',
-    password: '',
-  });
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({ resolver: zodResolver(loginUserSchema) });
+
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleInputChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const onSubmit = async (data: LoginUserData) => {
+    try {
+      const response = await loginUserAction(data);
+
+      if (response.status === 'SUCCESS') toast.success(response.message);
+      else toast.error(response.message);
+    } catch (error) {}
   };
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const loginData = {
-      email: formData.email.toLowerCase().trim(),
-      password: formData.password,
-    };
-
-  
- const response = await loginAction(loginData);  
- if(response.status==="SUCCESS")  
-  toast.success(response.message)
-else
-  toast.error(response.message)
-  }
-
-    
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <Card className="w-full max-w-md">
@@ -64,7 +53,7 @@ else
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Username Field */}
 
             <div className="space-y-6">
@@ -77,16 +66,17 @@ else
                 <Input
                   id="email"
                   type="text"
-                  name="email"
                   placeholder="Enter your Email"
                   required
-                  value={formData.email}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    handleInputChange('email', e.target.value)
-                  }
-                  className={`pl-10`}
+                  {...register('email')}
+                  className={`pl-10  focus:outline-none focus:ring-0 focus-visible:ring-0 ${errors.email ? 'border-destructive' : ''}`}
                 />
               </div>
+              {errors.email && (
+                <p className="text-sm text-destructive">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
             {/* Password Field */}
@@ -100,15 +90,11 @@ else
 
                 <Input
                   id="password"
-                  name="password"
-                  type="text"
-                  placeholder="Create strong Password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your Password"
                   required
-                  value={formData.password}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    handleInputChange('password', e.target.value)
-                  }
-                  className={`pl-10 pr-10`}
+                  {...register('password')}
+                  className={`pl-10 pr-10  focus:outline-none focus:ring-0 focus-visible:ring-0 ${errors.password ? 'border-destructive' : ''}`}
                 />
                 <Button
                   type="button"
@@ -124,6 +110,11 @@ else
                   )}
                 </Button>
               </div>
+              {errors.password && (
+                <p className="text-sm text-destructive">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             {/* Submit Button  */}
@@ -148,6 +139,5 @@ else
     </div>
   );
 };
-
 
 export default Login;

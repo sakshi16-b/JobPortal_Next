@@ -1,20 +1,24 @@
-
 'use server';
 import { db } from '@/config/db';
 import { users } from '@/drizzle/schema';
 import argon2 from 'argon2';
-import { error } from 'console';
 import { eq, or, and } from 'drizzle-orm';
+import { RegisterUserData, registrationUserSchema } from '../auth.schema';
+import { createSessionAndSetCookies } from './use-cases/sessions';
 
-export const registrationAction = async (data: {
-  name: string;
-  userName: string;
-  email: string;
-  password: string;
-  role: 'applicant' | 'employer';
-}) => {
+// export const registrationAction = async (data: {
+//   name: string;
+//   userName: string;
+//   email: string;
+//   password: string;
+//   role: 'applicant' | 'employer';
+
+export const registrationUserAction = async (data: RegisterUserData) => {
   try {
-    const { name, userName, email, password, role } = data;
+    const { data: validatedData, error } =
+      registrationUserSchema.safeParse(data);
+    if (error) return { status: 'Error', message: error.issues[0].message };
+    const { name, userName, email, password, role } = validatedData;
     const [user] = await db
       .select()
       .from(users)
@@ -36,8 +40,8 @@ export const registrationAction = async (data: {
       status: 'SUCCESS',
       message: 'User Registered Successfully',
     };
-  } catch (error) {
-    // console.log(error);
+  } catch (e) {
+    console.error('Login Error:', e);
     return {
       status: 'ERROR',
       message: 'Something went wrong',
@@ -45,7 +49,7 @@ export const registrationAction = async (data: {
   }
 };
 
-export const loginAction = async (data: {
+export const loginUserAction = async (data: {
   password: string;
   email: string;
 }) => {
@@ -57,7 +61,7 @@ export const loginAction = async (data: {
     if (!user) {
       return {
         status: 'ERROR',
-        message: 'Invalid mail or password',
+        message: 'Invalid email or password',
       };
     }
     const isPasswordCorrect = await argon2.verify(user.password, password);
@@ -68,6 +72,8 @@ export const loginAction = async (data: {
         message: 'Invalid mail or password',
       };
     }
+     await createSessionAndSetCookies(user.id);
+
     return {
       status: 'SUCCESS',
       message: 'Successfully logged in',
@@ -79,4 +85,4 @@ export const loginAction = async (data: {
       message: 'Something went wrong',
     };
   }
-}
+};
